@@ -1,36 +1,188 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cantoral
 
-## Getting Started
+Cancionero parroquial con acordes: una PWA para buscar, transportar y cantar canciones litúrgicas. Con afinador de micrófono integrado, valoraciones de usuarios, correcciones colaborativas y alternativas de cifrado.
 
-First, run the development server:
+## Características
+
+- **Biblioteca buscable**: navega por temas, busca por título/autor.
+- **Transposición**: transporta cualquier canción a tu tono (Do, Re, Mi, etc. o C, D, E, etc.).
+- **Afinador con micrófono**: detecta tu nota actual y te guía al tono correcto usando el detector de pitch.
+- **Valoraciones**: marca tus canciones favoritas con estrellas (1–5).
+- **Alternativas colaborativas**: propón versiones alternativas de cifrado para review admin.
+- **Correcciones**: sugiere cambios; los admins los resuelven.
+- **Formato ChordPro**: soporta cifrado español (Do Re Mi Fa Sol La Si) y anglosajón (C D E F G A B).
+- **PWA instalable**: agrega a inicio y úsala sin conexión (con límites).
+
+## Stack
+
+- **Frontend**: Next.js 16 (App Router, TypeScript), React 19.
+- **Estilos**: Tailwind CSS v4, mobile-first.
+- **Backend**: Supabase (PostgreSQL + Auth + Storage).
+- **Seguridad**: RLS (Row Level Security) en todas las tablas.
+- **Detección de pitch**: `pitchy` (análisis FFT).
+- **Parser de acordes**: `chordsheetjs`.
+
+## Puesta en marcha
+
+### 1. Crear proyecto Supabase
+
+Ve a [supabase.com](https://supabase.com), crea una cuenta gratuita y un nuevo proyecto. Guarda:
+- **URL del proyecto** (https://TU-PROYECTO.supabase.co)
+- **Anon Key** (pública, va en NEXT_PUBLIC_SUPABASE_ANON_KEY)
+- **Service Role Key** (secreta, NO se sube al repo)
+
+### 2. Ejecutar migraciones SQL
+
+En el SQL Editor de Supabase, copia y ejecuta el contenido de `supabase/migrations/0001_init.sql`. Esto crea:
+- Tablas: `profiles`, `songs`, `ratings`, `corrections`.
+- Políticas RLS que aseguran que los usuarios solo vean canciones publicadas (o las suyas).
+- Un bucket de Storage público (`songs-pdfs`) para PDFs de admin.
+
+### 3. Configurar variables de entorno
+
+Copia `.env.example` a `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Rellena con tus valores de Supabase:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_SUPABASE_URL=https://TU-PROYECTO.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key-aqui
+SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key-aqui
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Importante:**
+- Las variables con prefijo `NEXT_PUBLIC_` van al navegador; son públicas por diseño.
+- La **anon key es pública**; la seguridad real la imponen las **RLS policies**, no el secreto de la clave.
+- `SUPABASE_SERVICE_ROLE_KEY` es **secreta**. Defínela solo en `.env.local` y en tu hosting (p.ej. Vercel). **Nunca la subas al repo**.
+- `.env.local` está en `.gitignore`.
 
-## Learn More
+### 4. Instalar dependencias y ejecutar
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Abre [http://localhost:3000](http://localhost:3000). ¡Listo!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hacerte admin
 
-## Deploy on Vercel
+Una vez registrado, ejecuta en el SQL Editor de Supabase:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+update public.profiles set role='admin' where email='tu@correo';
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Como admin:
+- Ves todas las canciones (publicadas y pendientes).
+- Puedes crear/editar/eliminar canciones.
+- Resuelves correcciones y apruebas alternativas de usuarios.
+
+## Formato de canciones (ChordPro)
+
+Las canciones se almacenan en formato **ChordPro**. Ejemplos:
+
+### Cifrado español (Do Re Mi):
+
+```
+{title: Noche de paz}
+{key: Do}
+
+[Do]Noche de paz, noche de [Fa]amor,
+[Do]Todo duerme en rededor.
+[Sol]Belén nos [Do]vela su [Fa]fulgor,
+[Do]Llena de [Sol]dicha[Do] la noche de paz.
+```
+
+### Cifrado anglosajón (C D E):
+
+```
+{title: Peace in the Night}
+{key: C}
+
+[C]Night of peace, night of [F]love,
+[C]All the world sleeps around.
+```
+
+**Chords soportados**: Do Do# Re Re# Mi Fa Fa# Sol Sol# La La# Si (español) y C C# D D# E F F# G G# A A# B (anglosajón). Los transportes funcionan en ambos.
+
+Metadatos útiles:
+- `{title: Nombre}`: título.
+- `{key: Do}` o `{key: C}`: tonalidad original.
+- Líneas vacías separan estrofas y coros.
+
+Más info: [chordsheetjs docs](https://chordsheetjs.org/).
+
+## Despliegue en Vercel
+
+### Conectar repo
+
+1. Sube tu código a GitHub.
+2. Ve a [vercel.com](https://vercel.com), conecta tu repo.
+3. Vercel auto-detectará Next.js.
+
+### Variables de entorno
+
+En los settings del proyecto en Vercel, añade:
+
+- `NEXT_PUBLIC_SUPABASE_URL`: tu URL Supabase.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: la anon key.
+- `SUPABASE_SERVICE_ROLE_KEY`: la service role key (secreta).
+
+Vercel las cifrará y servirá de forma segura.
+
+### Desplegar
+
+```bash
+git push
+```
+
+Vercel construye y despliega automáticamente. Tu app estará en `https://TU-APP.vercel.app`.
+
+## Seguridad
+
+### En desarrollo
+
+- **`.env.local`**: contiene las claves secretas. Está en `.gitignore`; nunca se sube.
+- **`.env.example`**: solo los nombres de las variables (sin valores). Sirve de referencia.
+
+### En producción
+
+- Las variables se definen en Vercel (o tu hosting).
+- No hardcodees claves en el código.
+- La Service Role Key **debe estar cifrada** y accesible solo en server actions / server components.
+- Confía en las RLS policies de Supabase para permisos de lectura/escritura.
+
+## Tests
+
+Ejecuta los tests con Vitest:
+
+```bash
+npm test           # run una vez
+npm run test:watch # modo watch
+```
+
+Los tests están en `src/**/*.test.ts`. Escribe tests para:
+- Parser de ChordPro y transposición.
+- Detectores de pitch.
+- Lógica de auth y permisos (RLS en la BD, pero tests en el cliente si procede).
+
+## Contribuir
+
+1. Fork el repo.
+2. Crea una rama (`git checkout -b feat/mi-feature`).
+3. Escribe tests.
+4. Haz commit y push.
+5. Abre un PR con descripción clara.
+
+## Licencia
+
+MIT. Ver `LICENSE`.
+
+---
+
+**Cantoral**: hecho para que la comunidad parroquial cante mejor, juntos.

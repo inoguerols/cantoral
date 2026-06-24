@@ -2,25 +2,68 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1625;
+  --brand: #4f46e5; /* indigo moderno */
+  --brand-accent: #fb7185; /* coral cálido */
+  --chord: #4f46e5;
+  --song-font-size: 1.05rem; /* lo ajusta el control A-/A+ en la vista de canción */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #15121f;
+    --foreground: #ede9f5;
+    --brand: #a78bfa;
+    --brand-accent: #c4b5fd;
+    --chord: #c4b5fd;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ── Partitura (salida de chordsheetjs HtmlDivFormatter) ──
+   Mobile-first: acordes alineados sobre la sílaba, monoespaciada para que la
+   alineación no baile, y wrap por columnas para evitar scroll horizontal. */
+.chord-sheet {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--song-font-size);
+  line-height: 1.15;
+}
+.chord-sheet .paragraph {
+  margin-bottom: 1.1em;
+}
+.chord-sheet .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.chord-sheet .column {
+  display: inline-flex;
+  flex-direction: column;
+}
+.chord-sheet .chord {
+  font-weight: 700;
+  color: var(--chord);
+  min-height: 1.3em;
+  white-space: pre;
+  padding-right: 0.15em;
+}
+.chord-sheet .lyrics {
+  white-space: pre;
+}
+.chord-sheet .comment {
+  font-style: italic;
+  opacity: 0.7;
 }

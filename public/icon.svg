@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Cantoral">
+  <defs>
+    <linearGradient id="cantoral-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#fb7185"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#cantoral-bg)"/>
+  <!-- Dos corcheas con viga: marca musical y moderna. El mástil más alto
+       se remata con una pequeña cruz discreta (música + fe, sin recargar). -->
+  <g fill="#ffffff">
+    <polygon points="170,150 342,120 342,150 170,180"/>
+    <rect x="170" y="150" width="18" height="210" rx="9"/>
+    <rect x="324" y="92" width="18" height="268" rx="9"/>
+    <rect x="313" y="104" width="40" height="14" rx="7"/>
+    <ellipse cx="152" cy="360" rx="46" ry="34" transform="rotate(-20 152 360)"/>
+    <ellipse cx="306" cy="330" rx="46" ry="34" transform="rotate(-20 306 330)"/>
+  </g>
+</svg>
