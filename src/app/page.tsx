@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/types";
 import SongCard from "@/components/SongCard";
@@ -48,6 +49,7 @@ export default async function Home({ searchParams }: Props) {
     <div className="px-1 py-2">
       <div className="mx-auto max-w-3xl">
         <header className="mb-8 text-center">
+          <Image src="/icon.svg" alt="" width={72} height={72} priority className="mx-auto mb-3 rounded-2xl" />
           <h1 className="text-4xl font-bold tracking-tight" style={{ color: "var(--brand)" }}>
             Cantoral
           </h1>
