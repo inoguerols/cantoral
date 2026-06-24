@@ -33,10 +33,11 @@ Ve a [supabase.com](https://supabase.com), crea una cuenta gratuita y un nuevo p
 
 ### 2. Ejecutar migraciones SQL
 
-En el SQL Editor de Supabase, copia y ejecuta el contenido de `supabase/migrations/0001_init.sql`. Esto crea:
-- Tablas: `profiles`, `songs`, `ratings`, `corrections`.
-- Políticas RLS que aseguran que los usuarios solo vean canciones publicadas (o las suyas).
-- Un bucket de Storage público (`songs-pdfs`) para PDFs de admin.
+En el SQL Editor de Supabase, ejecuta **en orden**:
+1. `supabase/migrations/0001_init.sql` — tablas (`profiles`, `songs`, `ratings`, `corrections`), políticas RLS y bucket de Storage público (`songs-pdfs`).
+2. `supabase/migrations/0002_access.sql` — columna `songs.access` (`public` | `members`) y RLS que solo muestra sin sesión las canciones públicas.
+
+**Importar el cancionero (opcional):** si tienes un fichero de import en `data/songs_import.sql` (carpeta `data/` ignorada por git, por contener letras con copyright), ejecútalo después. Lee antes [`docs/derechos-y-licencias.md`](docs/derechos-y-licencias.md): casi todo el repertorio moderno tiene copyright y debe quedar como `members` (solo usuarios registrados) hasta tener licencia.
 
 ### 3. Configurar variables de entorno
 
