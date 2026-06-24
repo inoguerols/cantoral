@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { renderChordPro, transposedKey } from "@/lib/chords";
+import { renderChordPro, transposedKey, type Notation } from "@/lib/chords";
 import SongRating from "@/components/SongRating";
 import SuggestionForms from "@/components/SuggestionForms";
 
@@ -11,6 +11,9 @@ const FS_MIN = 0.8;
 const FS_MAX = 2.0;
 const FS_STEP = 0.15;
 const FS_DEFAULT = 1.05;
+
+const NOT_KEY = "cantoral:notation";
+type NotationPref = "original" | Notation;
 
 interface Alternative { id: string; title: string; author: string | null }
 
@@ -34,16 +37,23 @@ export default function SongView({
 }: Props) {
   const [semitones, setSemitones] = useState(0);
   const [fontSize, setFontSize] = useState(FS_DEFAULT);
+  const [notation, setNotation] = useState<NotationPref>("original");
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Restaura tamaño de letra del localStorage al montar
+  // Restaura preferencias del localStorage al montar
   useEffect(() => {
     const stored = localStorage.getItem(FS_KEY);
     if (stored) {
       const n = parseFloat(stored);
       if (!isNaN(n) && n >= FS_MIN && n <= FS_MAX) setFontSize(n);
     }
+    const not = localStorage.getItem(NOT_KEY);
+    if (not === "solfege" || not === "english" || not === "original") setNotation(not);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(NOT_KEY, notation);
+  }, [notation]);
 
   // Persiste tamaño y aplica la CSS var al contenedor de partitura
   useEffect(() => {
@@ -64,7 +74,8 @@ export default function SongView({
     });
   }
 
-  const claveMostrada = originalKey ? transposedKey(originalKey, semitones) : null;
+  const notArg = notation === "original" ? undefined : notation;
+  const claveMostrada = originalKey ? transposedKey(originalKey, semitones, notArg) : null;
 
   const btnBase =
     "min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg font-bold text-sm select-none transition-opacity active:opacity-60 border border-current/20 px-3";
@@ -122,6 +133,30 @@ export default function SongView({
               aria-label="Aumentar tamaño de letra"
             ><span style={{ fontSize: "1.1rem" }}>A</span></button>
           </div>
+
+          {/* Separador */}
+          <span className="opacity-20 select-none">|</span>
+
+          {/* Notación: original / solfeo (Do) / americano (C) */}
+          <div className="flex items-center gap-1" role="group" aria-label="Cifrado">
+            {([
+              ["original", "Orig"],
+              ["solfege", "Do"],
+              ["english", "C"],
+            ] as [NotationPref, string][]).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setNotation(val)}
+                aria-pressed={notation === val}
+                className={`min-h-[44px] px-3 rounded-lg text-sm font-semibold transition-colors ${
+                  notation === val ? "text-white" : "opacity-60 border border-current/20"
+                }`}
+                style={notation === val ? { background: "var(--brand)" } : undefined}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -130,16 +165,23 @@ export default function SongView({
         {/* Cabecera */}
         <div>
           <h1 className="text-2xl font-bold leading-tight">{title}</h1>
-          {author && <p className="text-sm opacity-60 mt-0.5">{author}</p>}
+          {author && (
+            <p className="text-sm opacity-60 mt-0.5">
+              <Link href={`/?author=${encodeURIComponent(author)}`} className="hover:underline">
+                {author}
+              </Link>
+            </p>
+          )}
           {themes.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {themes.map((t) => (
-                <span
+                <Link
                   key={t}
-                  className="text-xs px-2 py-0.5 rounded-full border border-current/20 opacity-70"
+                  href={`/?theme=${encodeURIComponent(t)}`}
+                  className="text-xs px-2 py-0.5 rounded-full border border-current/20 opacity-70 hover:opacity-100"
                 >
                   {t}
-                </span>
+                </Link>
               ))}
             </div>
           )}
@@ -160,7 +202,7 @@ export default function SongView({
         <div ref={sheetRef}>
           <div
             className="chord-sheet"
-            dangerouslySetInnerHTML={{ __html: renderChordPro(chordpro, semitones) }}
+            dangerouslySetInnerHTML={{ __html: renderChordPro(chordpro, semitones, notArg) }}
           />
         </div>
 

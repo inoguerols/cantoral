@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderChordPro, transposedKey } from "./chords";
+import { renderChordPro, transposedKey, convertNotation } from "./chords";
 
 describe("renderChordPro", () => {
   it("transpone +2 semitonos (C -> D) y conserva la letra", () => {
@@ -31,5 +31,24 @@ describe("transposedKey", () => {
   it("tonalidad vacía o inválida no rompe", () => {
     expect(transposedKey("", 2)).toBe("");
     expect(transposedKey("???", 2)).toBe("???");
+  });
+});
+
+describe("convertNotation", () => {
+  it("anglosajón -> solfeo (G -> Sol, Am -> Lam, Bm7/A -> Sim7/La)", () => {
+    expect(convertNotation("[G]a [Am]b [Bm7/A]c", "solfege")).toBe("[Sol]a [Lam]b [Sim7/La]c");
+  });
+  it("solfeo -> anglosajón (Do -> C, Sol7 -> G7, Fa#m -> F#m)", () => {
+    expect(convertNotation("[Do]a [Sol7]b [Fa#m]c", "english")).toBe("[C]a [G7]b [F#m]c");
+  });
+  it("convierte la tonalidad del encabezado {key:}", () => {
+    expect(convertNotation("{key: G}\n[G]hola", "solfege")).toBe("{key: Sol}\n[Sol]hola");
+  });
+  it("render con notación fuerza el sistema y sigue transponiendo", () => {
+    const html = renderChordPro("[G]hola", 2, "solfege"); // G+2 = A = La
+    expect(html).toContain("La");
+  });
+  it("transposedKey en solfeo (G +2 -> La)", () => {
+    expect(transposedKey("G", 2, "solfege")).toBe("La");
   });
 });

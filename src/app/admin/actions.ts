@@ -38,6 +38,16 @@ export async function createOrUpdateSong(formData: FormData) {
     const { error } = await supabase.from("songs").update(payload).eq("id", id);
     if (error) throw new Error(error.message);
   } else {
+    // Detección de duplicados: compara títulos normalizados (sin acentos ni mayúsculas).
+    const norm = (s: string) =>
+      s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+    const { data: existing } = await supabase
+      .from("songs")
+      .select("title")
+      .is("parent_id", null);
+    if ((existing ?? []).some((e) => norm(e.title) === norm(title))) {
+      throw new Error(`Ya existe una canción titulada «${title}». Si es una versión distinta, súbela como alternativa.`);
+    }
     const { error } = await supabase.from("songs").insert({ ...payload, parent_id: null });
     if (error) throw new Error(error.message);
   }
