@@ -29,8 +29,10 @@ export async function createOrUpdateSong(formData: FormData) {
   const original_key = (formData.get("original_key") as string | null)?.trim() || null;
   const status = (formData.get("status") as string) || "published";
   const pdf_path = (formData.get("pdf_path") as string | null)?.trim() || null;
+  // 'members' por defecto: las copyright no se exponen al público sin querer.
+  const access = (formData.get("access") as string) === "public" ? "public" : "members";
 
-  const payload = { title, author, themes, chordpro, original_key, status, pdf_path };
+  const payload = { title, author, themes, chordpro, original_key, status, pdf_path, access };
 
   if (id) {
     const { error } = await supabase.from("songs").update(payload).eq("id", id);

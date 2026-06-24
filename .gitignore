@@ -34,6 +34,10 @@ yarn-error.log*
 .env*
 !.env.example
 
+# datos del cancionero (letras con copyright): NUNCA en el repo público.
+# Las canciones reales viven solo en Supabase; el import local va aquí.
+/data/
+
 # vercel
 .vercel
 

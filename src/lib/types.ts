@@ -2,6 +2,7 @@
 
 export type Role = "user" | "admin";
 export type SongStatus = "published" | "pending";
+export type SongAccess = "public" | "members";
 
 export interface Profile {
   id: string;
@@ -20,6 +21,7 @@ export interface Song {
   original_key: string | null;
   pdf_path: string | null;
   status: SongStatus;
+  access: SongAccess;
   parent_id: string | null;
   created_by: string | null;
   created_at: string;

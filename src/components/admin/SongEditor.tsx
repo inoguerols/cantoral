@@ -117,6 +117,21 @@ export default function SongEditor({ song, onDone }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium" htmlFor="se-access">
+            Acceso
+          </label>
+          <select
+            id="se-access"
+            name="access"
+            defaultValue={song?.access ?? "members"}
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand dark:border-zinc-600 dark:bg-zinc-800"
+          >
+            <option value="members">Solo miembros (por defecto — repertorio con copyright)</option>
+            <option value="public">Pública (dominio público o con licencia)</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
           <label className="text-sm font-medium" htmlFor="se-chordpro">
             ChordPro <span className="text-red-500">*</span>
           </label>
