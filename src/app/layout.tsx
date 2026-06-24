@@ -33,6 +33,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Link>
             <div className="ml-auto flex items-center gap-1 text-sm">
               <Link
+                href="/listas"
+                className="rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                Listas
+              </Link>
+              <Link
                 href="/tuner"
                 className="rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/10"
               >

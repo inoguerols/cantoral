@@ -35,3 +35,41 @@ export interface Correction {
   status: "open" | "resolved";
   created_at: string;
 }
+
+export type EventType = "boda" | "bautizo" | "comunion" | "funeral" | "otro";
+
+export interface Setlist {
+  id: string;
+  title: string;
+  event_type: EventType | null;
+  notes: string | null;
+  share_token: string;
+  created_by: string;
+  created_at: string;
+}
+
+/** Una canción dentro de una lista, con su orden y tono marcado. */
+export interface SetlistSong {
+  setlist_id: string;
+  song_id: string;
+  position: number;
+  semitones: number;
+}
+
+/** Forma que devuelve la función SQL get_shared_setlist (vista pública). */
+export interface SharedSetlist {
+  id: string;
+  title: string;
+  event_type: EventType | null;
+  notes: string | null;
+  songs: {
+    song_id: string;
+    title: string;
+    author: string | null;
+    original_key: string | null;
+    access: SongAccess;
+    position: number;
+    semitones: number;
+    chordpro: string | null; // null si no se puede mostrar (copyright + sin sesión)
+  }[];
+}
